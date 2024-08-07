@@ -302,7 +302,7 @@
                     },                         
                     success: function(data) {
                         
-                        if (data == 0) {
+                        if (data.ganador == 0) {
                             $("#ganador").html("No hay más números para sortear");
                         } else {
                             $("#ganador").html("Ganador: <br>"+data.ganador);
