@@ -1,11 +1,17 @@
 <?php 
+    error_reporting(E_ALL);
+    ini_set("display_errors", 1);
 
-    //require 'ObtenerDatosConexion.Class.php';
+    try {
+        $dbh = new PDO("sqlite:base.sqlite");
+    } catch (PDOException $e) {
+        print_r("Error grave");
+        print "<p>Error: No puede conectarse con la base de datos.</p>\n";
+        exit();
+    }
 
-    function shuffle_nums($min, $max, $count)
+    function shuffle_nums($min, $max, $count, $dbh)
     {
-        $Base = ObtenerConexion::Conectar('base');
-
         $nums = range($min, $max);
         shuffle($nums);
         
@@ -17,12 +23,12 @@
         
         $aleatorio = $response[0];
 
-        $sql = "SELECT COUNT(*) count FROM inscripciones WHERE gano = 0 AND id =" . $aleatorio;
-        $stmt = $Base->prepare( $sql );
+        $sql = "SELECT COUNT(*) count FROM tickets WHERE gano = 0 AND numero =" . $aleatorio;
+        $stmt = $dbh->prepare( $sql );
         $stmt->execute();
-        $count = $stmt->fetch(PDO::FETCH_ASSOC);
+        $count = $stmt->fetchColumn(); 
 
-        if ( $count['count'] == 0) {
+        if ( $count == 0) {
             return 0;
         } else {
             return $aleatorio;
@@ -30,9 +36,9 @@
         
     }
 
+    /*
     function numAleatorio($maximo)
     {
-
         //alimentamos el generador de aleatorios
         mt_srand (time());
         //generamos un número aleatorio
@@ -40,47 +46,32 @@
         
         return $numero_aleatorio;
     }
+    */
 
 
     if (isset($_POST['sortear']) && !empty($_POST['sortear']))
     {
-        /*
-        $Base = ObtenerConexion::Conectar('base');
-
-        $sql = "SELECT MAX(id) max_id FROM inscripciones WHERE gano = 0";
-        $stmt = $Base->prepare( $sql );
+        $sql= "SELECT MAX(numero) max FROM tickets WHERE gano = 0";
+        $stmt = $dbh->prepare( $sql );
         $stmt->execute();
-        $cant = $stmt->fetch(PDO::FETCH_ASSOC);
-        */
-
-        $cant['max_id'] = 100;
+        $max = $stmt->fetchColumn(); 
 
         $numero_aleatorio = 0;
 
-        for ($i = 1; $i <= $cant['max_id']; $i++) {
-            
-            //$numero_aleatorio = numAleatorio($cant['max_id']);
-            $numero_aleatorio = shuffle_nums(1, $cant['max_id'], 1);
-
-            //echo "<br>" . $i;
+        for ($i = 1; $i <= $max; $i++) {
+            //$numero_aleatorio = numAleatorio($max);
+            $numero_aleatorio = shuffle_nums(1, $max, 1, $dbh);
 
             if ( $numero_aleatorio > 0 ) {
                 //marco como ganado
-                $query = "UPDATE inscripciones SET gano = 1 WHERE id = ".$numero_aleatorio;
-                //$stmt = $Base->query( $query );                
-                
+                $query = "UPDATE tickets SET gano = 1 WHERE numero = ".$numero_aleatorio;
+                $dbh->query($query);
+
                 break;
             }
         }
 
-        //echo $numero_aleatorio;
-
-        $sql = "SELECT * FROM inscripciones WHERE id = ".$numero_aleatorio;
-        $stmt = $Base->prepare( $sql );
-        $stmt->execute();
-        $ganador = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        echo json_encode(array( "error" => false, "ganador" => $ganador ));
+        echo json_encode(array( "error" => false, "ganador" => $numero_aleatorio ));
 
         die();
     }
@@ -187,7 +178,8 @@
         }
 
         #main-slide .slider-content h1 {
-            line-height: 100px;
+            /*line-height: 200px;*/
+            margin-top: 100px;
         }
     </style>
     
@@ -313,7 +305,7 @@
                         if (data == 0) {
                             $("#ganador").html("No hay más números para sortear");
                         } else {
-                            $("#ganador").html("Ganador: <br>"+data.ganador.apynom);
+                            $("#ganador").html("Ganador: <br>"+data.ganador);
                         }
                         
                         $( ".btn" ).removeAttr('disabled');

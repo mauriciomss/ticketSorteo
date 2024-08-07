@@ -617,8 +617,8 @@ li {
 }
 
 #main-slide .btn-primary:hover {
-	background: transparent;
-	border: 1px solid #fff;
+	background: #FF8000;
+	border: 1px solid #DF3A01;
 }
 
 .slider.btn.btn-default{
