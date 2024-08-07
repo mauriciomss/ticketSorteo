@@ -6,4 +6,4 @@
 #para descargar cambios
 git pull
 
-sudo chmod 777 -R writable/
+sudo chmod 777 -R *

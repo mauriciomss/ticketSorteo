@@ -305,7 +305,7 @@
                         if (data.ganador == 0) {
                             $("#ganador").html("No hay más números para sortear");
                         } else {
-                            $("#ganador").html("Ganador: <br>"+data.ganador);
+                            $("#ganador").html("Ganador: "+data.ganador);
                         }
                         
                         $( ".btn" ).removeAttr('disabled');
